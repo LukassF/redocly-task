@@ -1,13 +1,14 @@
 import { useState, type FC } from "react";
 import type { OpenAPI3 } from "openapi-typescript";
 import clsx from "clsx";
-import { bundleFromString, createConfig } from "@redocly/openapi-core";
+import { parseYamlContent } from "../utils/openapi";
 
 interface IProps {
   onSetApi: (api: OpenAPI3) => void;
+  onSetYamlRaw: (val: string) => void;
 }
 
-export const FileUpload: FC<IProps> = ({ onSetApi }) => {
+export const FileUpload: FC<IProps> = ({ onSetApi, onSetYamlRaw }) => {
   const [error, setError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [fileName, setFileName] = useState<string>("");
@@ -23,16 +24,9 @@ export const FileUpload: FC<IProps> = ({ onSetApi }) => {
     try {
       setFileName(file.name);
       const text = await file.text();
+      onSetYamlRaw(text);
 
-      const config = await createConfig({});
-
-      const result = await bundleFromString({
-        source: text,
-        config,
-        dereference: true,
-      });
-
-      const apiDoc = result.bundle.parsed as OpenAPI3;
+      const apiDoc = await parseYamlContent(text);
       console.log(apiDoc);
       onSetApi(apiDoc);
       setError(null);
