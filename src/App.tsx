@@ -30,6 +30,7 @@ function App() {
         <EditorContainer
           definition={yamlRaw}
           onConfirm={async (text: string) => {
+            // validate yaml structure
             const apiContent = await parseYamlContent(text);
             setApi(apiContent);
           }}
